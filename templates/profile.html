@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Профиль - {{ user[0].username}}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Профиль</h1>
+    <div class="alert alert-info">
+        <h3>Логин:{{ user[0].name }}</h3>
+        <h3>Имя:{{ user[0].username }}</h3>
+        <h3>Пароль:{{ user[0].parole }}</h3>
+        <p><b>Дата:{{ user[0].date }}</b></p>
+    </div>
+</div>
+{% endblock %}

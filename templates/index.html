@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %} Главная {% endblock %}
+
+{% block body %}
+
+    {% if user %}
+
+        <h1>Здравствуйте, {{ user[0].username }}!</h1>
+
+    {% endif %}
+
+{% endblock %}

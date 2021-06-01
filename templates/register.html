@@ -1,0 +1,45 @@
+{% extends 'baseAutho.html' %}
+
+{% block title %}
+Регистрация
+{% endblock %}
+
+{% block body %}
+<form class="form-in" method="post">
+    <div class="form-title">
+        Регистрация
+    </div>
+    <label for="name">
+        <span class="exp-title">
+            Логин для входа в аккаунт
+        </span>
+        <input class="input" type="text" id="name" name="name" placeholder="">
+    </label>
+
+    <label for="username">
+        <span class="exp-title">
+            Имя аккаунта
+        </span>
+        <input class="input" type="text" id="username" name="username" placeholder="">
+    </label>
+
+    <label for="parole">
+        <span class="exp-title">
+            Пароль
+        </span>
+        <input class="input" type="password" id="parole" name="parole" placeholder="">
+    </label>
+
+    <label for="capt">
+        <span class="exp-title">
+            Проверка
+        </span>
+        <input class="input" type="text" id="captcha" name="captcha" placeholder="7 * 8">
+    </label>
+
+    <div class="form-submit">
+        <input type="submit" id="inp-dd-syb" value="Войти">
+        <span class="explain lost-passwor-bth">Есть аккаунт? <a href="/login">Войти</a></span>
+    </div>
+</form>
+{% endblock %}

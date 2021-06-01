@@ -1,0 +1,39 @@
+{% extends 'baseAutho.html' %}
+
+{% block title %}
+Авторизация
+{% endblock %}
+
+{% block body %}
+<form class="form-in" method="post">
+        <div class="form-title">
+            Авторизация
+        </div>
+        <label for="log">
+            <span class="exp-title">
+                Логин
+            </span>
+            <input class="input" type="text" id="name" name="name" placeholder="">
+        </label>
+
+        <label for="pass">
+            <span class="exp-title">
+                Пароль
+            </span>
+            <input class="input" type="password" id="parole" name="parole" placeholder="">
+            <span class="explain lost-passwor-bth"><a href="#">Забыли пароль?</a></span>
+        </label>
+
+        <label for="capt">
+            <span class="exp-title">
+                Проверка
+            </span>
+            <input class="input" type="text" id="captcha" name="captcha" placeholder="7 * 8">
+        </label>
+
+        <div class="form-submit">
+            <input type="submit" id="inp-dd-syb" value="Войти" placeholder="Войти">
+            <span class="explain lost-passwor-bth">Нет аккаунта? <a href="/register">Зарегистрироваться</a></span>
+        </div>
+</form>
+{% endblock %}

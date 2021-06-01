@@ -1,0 +1,16 @@
+# Folder
+node_modules
+build
+
+# Hidden
+.dist
+.idea
+
+# Object
+*.[oa]
+*~
+
+# File
+yarn.lock
+package-lock.json
+*.txt
