@@ -5,6 +5,8 @@ build
 # Hidden
 .dist
 .idea
+.vscode
+__pycache__
 
 # Object
 *.[oa]

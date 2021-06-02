@@ -1,28 +1,21 @@
 # Libs
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from uuid import uuid4
+import pretty_errors
 import hashlib
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+baseDir = os.path.abspath(os.path.dirname(__file__))
+
+app.config['SECRET_KEY'] = 'you-will-never-guess'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(baseDir, 'users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-SESSION_ID = None
-SESSION_NAME = None
+app.secret_key = 'SOME_SECRET'
 
-# DATABASE
-class Users(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(30), nullable=False)
-    name = db.Column(db.String(30), nullable=False)
-    parole = db.Column(db.String(30), nullable=False)
-    auto = db.Column(db.Integer, default=0)
-    date = db.Column(db.DateTime, default=datetime.utcnow())
-
-    def __repr__(self):
-        return '<Users %r>' % self.id
 
 # APPLICATION
 class App:
@@ -32,75 +25,87 @@ class App:
     @app.route('/')
     @app.route('/home')
     def index():
-        if SESSION_ID is None and SESSION_NAME is None:
-            return redirect('/login')
-        else:
-            sqluser = db.session.execute("SELECT * FROM users WHERE id = :id", {'id': SESSION_ID})
+        if 'username' in session and 'id' in session:
+            sqluser = db.session.execute("SELECT * FROM users WHERE id = :id", {'id': session['id']})
             user = sqluser.fetchall()
             return render_template("index.html", user=user)
-
-    @app.route('/profile')
-    def profile():
-        if SESSION_ID is None and SESSION_NAME is None:
-            return redirect('/login')
-        else: 
-            sqluser = db.session.execute("SELECT * FROM users WHERE id = :id", {'id': SESSION_ID})
-            user = sqluser.fetchall()
-            return render_template("profile.html", user=user)     
-    
-    @app.route('/login', methods = ['POST', 'GET'])
-    def login():
-        if request.method == "POST":
-            name = request.form['name']
-            parole = request.form['parole']
-
-            try: 
-                sqluser = db.session.execute("SELECT * FROM users WHERE name = :name", {'name': name})
-                user = sqluser.fetchall()
-
-                if user[0].parole == parole and user[0].name == name:
-                    db.session.execute("UPDATE users SET auto = :auto WHERE name = :name", {
-                        'auto': 1,
-                        'name': name
-                    })
-                    db.session.commit()
-
-                    global SESSION_ID
-                    SESSION_ID = user[0].id
-                    global SESSION_NAME 
-                    SESSION_NAME = user[0].name
-
-                    return redirect('/')
-                else:
-                    return render_template("error.html", error='Данные указаны неверно')
-            except:
-                return render_template("error.html", error='Произошла ошибка при авторизации')
         else:
-            return render_template("login.html")
+            return redirect('/login')
 
-    @app.route('/register', methods = ['POST', 'GET'])
+    @app.route('/login', methods=['POST', 'GET'])
+    def login():
+        if 'username' in session and 'id' in session:
+            return redirect('/')
+        else:
+            if request.method == "POST":
+                name = request.form['name']
+                parole = request.form['parole']
+
+                try:
+                    sqluser = db.session.execute("SELECT * FROM users WHERE name = :name", {'name': name})
+                    user = sqluser.fetchall()
+
+                    if user[0].parole == parole and user[0].name == name:
+                        db.session.execute("UPDATE users SET auto = :auto WHERE name = :name", {
+                            'auto': 1,
+                            'name': name
+                        })
+                        db.session.commit()
+
+                        session['username'] = user[0].name
+                        session['id'] = user[0].id
+
+                        return redirect('/')
+                    else:
+                        return render_template("error.html", error='Данные указаны неверно')
+                except:
+                    return render_template("error.html", error='Произошла ошибка при авторизации')
+            else:
+                return render_template("login.html")
+
+    @app.route('/register', methods=['POST', 'GET'])
     def register():
-        if SESSION_ID is None and SESSION_NAME is None:
+        if 'username' in session and 'id' in session:
+            return redirect('/')
+        else:
             if request.method == "POST":
                 username = request.form['username']
                 name = request.form['name']
                 parole = request.form['parole']
 
-                md5 = hashlib.new('md5', parole.encode('utf-8'))
-                # parole = md5.hexdigest()
+                if len(username) > 0 and len(name) > 0 and len(parole) >= 5:
+                    userkey = uuid4()
 
-                # users = Users(username=username, name=name, parole=parole)
+                    md5 = hashlib.new('md5', parole.encode('utf-8'))
+                    # parole = md5.hexdigest()
 
-                try:
-                    db.session.execute("INSERT INTO users (username, name, parole) VALUES (?, ?, ?)", (username, name, parole))
-                    db.session.commit()
-                    return redirect('/login')
-                except:
-                    return render_template("error.html", error='Произошла ошибка при регистрации')
-            else: 
+                    # users = Users(username=username, name=name, parole=parole)
+
+                    try:
+                        sqlif = db.session.execute("SELECT * FROM users WHERE name = :name", {'name': name})
+                        row = sqlif.fetchone()
+
+                        if row is None:
+                            db.session.execute("INSERT INTO users (username, name, parole, key) VALUES (?, ?, ?, ?)",
+                                               (username, name, parole, userkey))
+                            db.session.commit()
+                            return redirect('/login')
+                    except:
+                        return render_template("error.html", error='Произошла ошибка при регистрации')
+            else:
                 return render_template("register.html")
-        else: 
-            return redirect('/')
+
+    @app.route('/exit')
+    def exit():
+        db.session.execute("UPDATE users SET auto = :auto WHERE id = :id", {
+            'auto': 0,
+            'id': session['id']
+        })
+        db.session.commit()
+        session.pop('username', None)
+        session.pop('id', None)
+        return redirect('/login')
+
 
 if __name__ == '__main__':
-    app.run(port=3000, host='127.0.0.1')
+    app.run(debug=True, port=3000, host='127.0.0.1')
