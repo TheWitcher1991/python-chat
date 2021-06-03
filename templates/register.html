@@ -6,6 +6,9 @@
 
 {% block body %}
 <form class="form-in" method="post">
+    {% for cat, msg in get_flashed_messages() %}
+    <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
     <div class="form-title">
         Регистрация
     </div>
@@ -30,11 +33,11 @@
         <input class="input" type="password" id="parole" name="parole" placeholder="">
     </label>
 
-    <label for="capt">
+    <label for="captcha">
         <span class="exp-title">
-            Проверка
+            Проверка (Введите: HATEFREE)
         </span>
-        <input class="input" type="text" id="captcha" name="captcha" placeholder="7 * 8">
+        <input class="input" type="text" id="captcha" name="captcha" placeholder="">
     </label>
 
     <div class="form-submit">

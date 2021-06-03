@@ -1,15 +1,22 @@
 # Libs
-from flask import Flask, render_template, url_for, request, redirect, session
-from flask_sqlalchemy import SQLAlchemy
-from uuid import uuid4
-import pretty_errors
-import hashlib
 import os
+import pretty_errors
+from uuid import uuid4
+
+from flask import Flask, \
+    render_template, \
+    request, \
+    redirect, \
+    session, \
+    flash, \
+    abort, url_for, get_flashed_messages
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 baseDir = os.path.abspath(os.path.dirname(__file__))
 
-app.config['SECRET_KEY'] = 'you-will-never-guess'
+app.config['SECRET_KEY'] = '$DC84J#$JFJ1E$LF0I30RF4'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(baseDir, 'users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -40,12 +47,13 @@ class App:
             if request.method == "POST":
                 name = request.form['name']
                 parole = request.form['parole']
+                catch = request.form['captcha']
 
                 try:
                     sqluser = db.session.execute("SELECT * FROM users WHERE name = :name", {'name': name})
                     user = sqluser.fetchall()
 
-                    if user[0].parole == parole and user[0].name == name:
+                    if check_password_hash(user[0].parole, parole) and user[0].name == name and catch == 'HATEFREE':
                         db.session.execute("UPDATE users SET auto = :auto WHERE name = :name", {
                             'auto': 1,
                             'name': name
@@ -55,11 +63,12 @@ class App:
                         session['username'] = user[0].name
                         session['id'] = user[0].id
 
+                        flash('Авторизация прошла успешно!', category='success')
                         return redirect('/')
                     else:
-                        return render_template("error.html", error='Данные указаны неверно')
+                        flash('Неверный логин или пароль', category='error')
                 except:
-                    return render_template("error.html", error='Произошла ошибка при авторизации')
+                    flash('Произошла ошибка при авторизации', category='error')
             else:
                 return render_template("login.html")
 
@@ -73,11 +82,10 @@ class App:
                 name = request.form['name']
                 parole = request.form['parole']
 
-                if len(username) > 0 and len(name) > 0 and len(parole) >= 5:
+                if len(username) > 4 and len(name) >= 5 and len(parole) >= 5:
                     userkey = uuid4()
 
-                    md5 = hashlib.new('md5', parole.encode('utf-8'))
-                    # parole = md5.hexdigest()
+                    hashStr = generate_password_hash(parole)
 
                     # users = Users(username=username, name=name, parole=parole)
 
@@ -87,11 +95,14 @@ class App:
 
                         if row is None:
                             db.session.execute("INSERT INTO users (username, name, parole, key) VALUES (?, ?, ?, ?)",
-                                               (username, name, parole, userkey))
+                                               (username, name, hashStr, userkey))
                             db.session.commit()
+                            flash('Регистрация прошла успешно!', category='success') 
                             return redirect('/login')
                     except:
-                        return render_template("error.html", error='Произошла ошибка при регистрации')
+                        flash('Произошла ошибка при регистрации', category='error')
+                else:
+                    flash('Ошибка введите данные согласно условиям...', category='error')
             else:
                 return render_template("register.html")
 
@@ -105,6 +116,13 @@ class App:
         session.pop('username', None)
         session.pop('id', None)
         return redirect('/login')
+    
+    @app.errorhandler(404)
+    def pagenot(error):
+        if 'username' in session and 'id' in session:
+            return redirect('/')
+        else: 
+            return redirect('/login')
 
 
 if __name__ == '__main__':

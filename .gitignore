@@ -1,12 +1,12 @@
 # Folder
 node_modules
 build
+__pycache__
 
 # Hidden
 .dist
 .idea
 .vscode
-__pycache__
 
 # Object
 *.[oa]

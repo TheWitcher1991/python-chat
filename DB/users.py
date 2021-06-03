@@ -10,6 +10,7 @@ class Users(db.Model):
     parole = db.Column(db.String(30), nullable=False)
     key = db.Column(db.Text, nullable=False)
     auto = db.Column(db.Integer, default=0)
+    image = db.Column(db.String(30), nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow())
 
     def __repr__(self):

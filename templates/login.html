@@ -6,17 +6,20 @@
 
 {% block body %}
 <form class="form-in" method="post">
+        {% for cat, msg in get_flashed_messages() %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+        {% endfor %}
         <div class="form-title">
             Авторизация
         </div>
-        <label for="log">
+        <label for="name">
             <span class="exp-title">
                 Логин
             </span>
             <input class="input" type="text" id="name" name="name" placeholder="">
         </label>
 
-        <label for="pass">
+        <label for="parole">
             <span class="exp-title">
                 Пароль
             </span>
@@ -24,11 +27,11 @@
             <span class="explain lost-passwor-bth"><a href="#">Забыли пароль?</a></span>
         </label>
 
-        <label for="capt">
+        <label for="captcha">
             <span class="exp-title">
-                Проверка
+                Проверка (Введите: HATEFREE)
             </span>
-            <input class="input" type="text" id="captcha" name="captcha" placeholder="7 * 8">
+            <input class="input" type="text" id="captcha" name="captcha" placeholder="">
         </label>
 
         <div class="form-submit">

@@ -3,7 +3,7 @@
 }
 
 body {
-    background: #23272a;
+    background: hsl(0deg 2% 13%);
     color: #fff;
     font-family: Whitney,Helvetica Neue,Helvetica,Arial,sans-serif;
 }
@@ -143,3 +143,40 @@ body {
       transform: scale3D(0, 0, 1); 
     } 
   }
+  
+  
+ .header-section__top {
+    display: block;
+    background: #36393f;
+    width: 100%;
+    border-bottom: #000;
+    padding: 2px 6px;
+    box-shadow: 0 4px 4px 0 rgb(0 0 0 / 5%), 0 0 4px 0 rgb(0 0 0 / 5%);
+}
+  
+.header-section__top .flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+ .header-section__top .flex .left i {
+    font-size: 28px;
+ }
+ 
+ .header-section__top .flex .right span {
+    display: block;
+    font-size: 17px;
+ }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

@@ -6,38 +6,19 @@
 
     {% if user %}
 
-        <header id="header" class="header">
-            <section class="header-section__top">
-                <div class="flex">
-                    <div class="left"><i class="mdi mdi-menu"></i></div>
-                    <div class="right"><span>{{ user[0].username }}</span></div>
-                </div>
+        <footer id="footer" class="footer">
+            <section class="footer-container">
+                <nav class="footer-menu">
+                    <ul>
+                        <li class="chats"></li>
+                        <li class="settings"></li>
+                        <li></li>
+                        <li class=""></li>
+                        <li></li>
+                    </ul>
+                </nav>
             </section>
-            <section class="header-section-modal">
-                <div class="block">
-                    <div class="arrow-back">
-                        <span><i class="mdi mdi-arrow-left"></i></span>
-                    </div>
-                    <div class="top">
-                        <div class="flex">
-                            <div class="left img"></div>
-                            <div class="right text"></div>
-                        </div>
-                    </div>
-                    <div class="bottom">
-                        <ul>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                        </ul>
-                    </div>
-                    <div class="exit">
-                        <a href="/exit">Выйти</a>
-                    </div>
-                </div>
-            </section>
-        </header>
+        </footer>
 
     {% endif %}
 
