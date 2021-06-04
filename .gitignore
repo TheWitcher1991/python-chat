@@ -1,7 +1,6 @@
 # Folder
 node_modules
 build
-DB
 __pycache__
 
 # Hidden
@@ -18,4 +17,4 @@ __pycache__
 yarn.lock
 package-lock.json
 *.txt
-*.db
+.db
