@@ -1,27 +1,16 @@
-# Libs
-import os
-import pretty_errors
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 from uuid import uuid4
-
-from flask import Flask, \
-    render_template, \
+from flask import render_template, \
     request, \
     redirect, \
     session, \
-    flash, \
-    abort, url_for, get_flashed_messages
-from flask_sqlalchemy import SQLAlchemy
+    flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from cryptography.fernet import Fernet
 
-app = Flask(__name__)
-baseDir = os.path.abspath(os.path.dirname(__file__))
-
-app.config['SECRET_KEY'] = '$DC84J#$JFJ1E$LF0I30RF4'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(baseDir, 'users.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-app.secret_key = 'SOME_SECRET'
+from connect import db, app
+from DB.users import Users
 
 
 # APPLICATION
@@ -32,7 +21,7 @@ class App:
     @app.route('/')
     @app.route('/home')
     def index():
-        if 'username' in session and 'id' in session:
+        if 'username-k' in session and 'id-k' in session:
             sqluser = db.session.execute("SELECT * FROM users WHERE id = :id", {'id': session['id']})
             user = sqluser.fetchall()
             return render_template("index.html", user=user)
@@ -61,14 +50,18 @@ class App:
                         db.session.commit()
 
                         session['username'] = user[0].name
+                        session['session_n_key'] = Fernet.generate_key()
+                        session['username-k'] = f"{user[0].name}-{session['session_n_key']}"
                         session['id'] = user[0].id
+                        session['session_i_key'] = Fernet.generate_key()
+                        session['id-k'] = f"{user[0].id}-{session['session_i_key']}"
 
                         flash('Авторизация прошла успешно!', category='success')
                         return redirect('/')
                     else:
-                        flash('Неверный логин или пароль', category='error')
+                        return flash('Неверный логин или пароль', category='error')
                 except:
-                    flash('Произошла ошибка при авторизации', category='error')
+                    return flash('Произошла ошибка при авторизации', category='error')
             else:
                 return render_template("login.html")
 
@@ -81,28 +74,27 @@ class App:
                 username = request.form['username']
                 name = request.form['name']
                 parole = request.form['parole']
+                catch = request.form['captcha']
 
-                if len(username) > 4 and len(name) >= 5 and len(parole) >= 5:
+                if len(username) > 4 and len(name) >= 5 and len(parole) >= 5 and catch == 'HATEFREE':
                     userkey = uuid4()
 
                     hashStr = generate_password_hash(parole)
 
-                    # users = Users(username=username, name=name, parole=parole)
+                    users = Users(username=username, name=name, parole=hashStr, key=userkey)
 
                     try:
-                        sqlif = db.session.execute("SELECT * FROM users WHERE name = :name", {'name': name})
-                        row = sqlif.fetchone()
+                        # db.session.execute("INSERT INTO users (username, name, parole, key) VALUES (?, ?, ?, ?)",
+                        #                   (username, name, hashStr, userkey))
+                        db.session.add(Users)
+                        db.session.commit()
 
-                        if row is None:
-                            db.session.execute("INSERT INTO users (username, name, parole, key) VALUES (?, ?, ?, ?)",
-                                               (username, name, hashStr, userkey))
-                            db.session.commit()
-                            flash('Регистрация прошла успешно!', category='success') 
-                            return redirect('/login')
+                        flash('Регистрация прошла успешно!', category='success')
+                        return users
                     except:
-                        flash('Произошла ошибка при регистрации', category='error')
+                        return flash('Произошла ошибка при регистрации', category='error')
                 else:
-                    flash('Ошибка введите данные согласно условиям...', category='error')
+                    return flash('Ошибка введите данные согласно условиям...', category='error')
             else:
                 return render_template("register.html")
 
@@ -116,12 +108,12 @@ class App:
         session.pop('username', None)
         session.pop('id', None)
         return redirect('/login')
-    
+
     @app.errorhandler(404)
     def pagenot(error):
         if 'username' in session and 'id' in session:
             return redirect('/')
-        else: 
+        else:
             return redirect('/login')
 
 

@@ -1,12 +1,14 @@
 # Folder
 node_modules
 build
+DB
 __pycache__
 
 # Hidden
 .dist
 .idea
 .vscode
+.git
 
 # Object
 *.[oa]
@@ -16,3 +18,4 @@ __pycache__
 yarn.lock
 package-lock.json
 *.txt
+*.db
