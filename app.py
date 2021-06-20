@@ -1,5 +1,13 @@
-#!/usr/bin/python
+#!flask/bin/python
+
 # -*- coding: utf-8 -*-
+
+""" 
+    :version: 1.0.0
+    :see: https://github.com/TheWitcher1991/HateFree
+"""
+
+
 from uuid import uuid4
 from flask import render_template, \
     request, \
